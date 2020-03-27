@@ -46,7 +46,6 @@
 #include <asm/system_misc.h>
 #include <asm/sysreg.h>
 #include <soc/samsung/exynos-condbg.h>
-
 #ifdef CONFIG_SEC_DEBUG
 #include <linux/sec_debug.h>
 #endif
@@ -875,7 +874,6 @@ asmlinkage void bad_mode(struct pt_regs *regs, int reason, unsigned int esr)
 	}
 #endif
 
-	die("Oops - bad mode", regs, 0);
 	local_irq_disable();
 	panic("bad mode");
 }
@@ -954,7 +952,7 @@ static int bug_handler(struct pt_regs *regs, unsigned int esr)
 	case BUG_TRAP_TYPE_BUG:
 #ifdef CONFIG_SEC_DEBUG_EXTRA_INFO
 		sec_debug_set_extra_info_fault(BUG_FAULT, (unsigned long)regs->pc, regs);
-#endif		
+#endif
 		die("Oops - BUG", regs, 0);
 		break;
 
