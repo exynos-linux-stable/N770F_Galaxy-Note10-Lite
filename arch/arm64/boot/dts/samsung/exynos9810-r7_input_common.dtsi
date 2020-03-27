@@ -1,0 +1,167 @@
+/*
+ * SAMSUNG EXYNOS9810 board device tree source
+ *
+ * Copyright (c) 2017 Samsung Electronics Co., Ltd.
+ *		http://www.samsung.com
+ *
+ * This program is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License version 2 as
+ * published by the Free Software Foundation.
+*/
+
+#include <dt-bindings/input/input.h>
+#include <dt-bindings/interrupt-controller/irq.h>
+#include <dt-bindings/gpio/gpio.h>
+
+
+/ {
+	fragment@model {
+		target-path = "/";
+		__overlay__ {
+			gpio_keys {
+				status = "okay";
+				compatible = "gpio-keys";
+				pinctrl-names = "default";
+				pinctrl-0 = <&key_voldown &key_volup &key_power>;
+				button@1 {
+					label = "gpio-keys: KEY_VOLUMEDOWN";
+					linux,code = <114>;
+					gpios = <&gpa0 4 0xf>;
+				};
+				button@2 {
+					label = "gpio-keys: KEY_VOLUMEUP";
+					linux,code = <115>;
+					gpios = <&gpa0 3 0xf>;
+				};
+				button@3 {
+					label = "gpio-keys: KEY_POWER";
+					linux,code = <116>;
+					gpios = <&gpa2 4 0xf>;
+					gpio-key,wakeup = <1>;
+				};
+			};
+
+			wacom_ldo_en: wacom_ldo_en {
+				compatible = "regulator-fixed";
+				regulator-name = "wacom_3.3v";
+				regulator-min-microvolt = <3300000>;
+				regulator-max-microvolt = <3300000>;
+				gpio = <&gpm42 0 0>;
+				enable-active-high;
+				regulator-boot-on;
+			};
+		}; /* end of __overlay__ */
+	}; /* end of fragment */
+}; /* end of root */
+
+&pinctrl_0 {
+	key_voldown: key-voldown {
+		samsung,pins = "gpa0-4";
+		samsung,pin-function = <0xf>;
+		samsung,pin-pud = <0>;
+		samsung,pin-drv = <0>;
+	};
+
+	key_volup: key-volup {
+		samsung,pins = "gpa0-3";
+		samsung,pin-function = <0xf>;
+		samsung,pin-pud = <0>;
+		samsung,pin-drv = <0>;
+	};
+
+	key_power: key-power {
+		samsung,pins = "gpa2-4";
+		samsung,pin-function = <0xf>;
+	};
+
+	attn_irq: attn-irq {
+		samsung,pins = "gpa1-0";
+		samsung,pin-function = <0xf>;
+		samsung,pin-pud = <0>;
+		samsung,pin-drv = <0>;
+	};
+	attn_input: attn-input {
+		samsung,pins = "gpa1-0";
+		samsung,pin-function = <0>;
+		samsung,pin-pud = <1>;
+	};
+
+	epen_int_active: epen-int-active {
+		samsung,pins = "gpa3-3","gpa3-7";
+		samsung,pin-function = <0xf>;
+		samsung,pin-pud = <0>;
+		samsung,pin-drv = <0>;
+	};
+};
+
+&speedy {
+	s2mps18mfd@00 {
+		regulators {
+			ldo43_reg: LDO43 {
+				regulator-name = "tsp_avdd";
+				regulator-min-microvolt = <3000000>;
+				regulator-max-microvolt = <3000000>;
+				regulator-boot-on;
+			};
+		};
+	};
+};
+
+&hsi2c_10 {
+	#address-cells = <1>;
+	#size-cells = <0>;
+	status = "okay";
+	mms_ts@48 {
+		compatible = "melfas,mms_ts";
+		reg = <0x48>;
+		pinctrl-names = "on_state", "off_state";
+		pinctrl-0 = <&attn_irq>;
+		pinctrl-1 = <&attn_input>;
+		melfas,vdd_en = "tsp_avdd";
+		/*melfas,io_en = "tsp_io";*/
+		melfas,irq-gpio = <&gpa1 0 0>;
+		melfas,area-size = <133 266 341>; /* indicator: 24dp navigator:48dp edge:60px dpi=320 */
+		melfas,max_x_y = <4095 4095>;	/* x & y */
+		melfas,display_resolution = <1080 2400>;
+		melfas,node_info = <16 34 0>;	/* x & y & key */
+		melfas,event_info = <10 16 1>;		/* event format & event size */
+		melfas,fod_info = <16 12 24>;	/* tx, rx, vi size */
+		melfas,support_lpm = "true";
+		melfas,fw_name = "tsp_melfas/mss100_r7.fw";
+		support_ear_detect_mode;
+		enable_settings_aot;
+		support_fod;
+		support_open_short_test;
+		melfas,regulator_boot_on;
+	};
+};
+
+&hsi2c_23 {
+	status = "okay";
+	samsung,reset-before-trans;
+	wacom@56 {
+		compatible = "wacom,w90xx";
+		reg = <0x56>;
+		pinctrl-names = "default";
+		pinctrl-0 = <&epen_int_active>;
+		vdd-supply = <&wacom_ldo_en>;
+		/* gpios */
+		wacom,irq-gpio = <&gpa3 3 1>;
+		wacom,pdct-gpio = <&gpa3 7 1>;
+		wacom,fwe-gpio = <&gpm41 0 0>;
+		wacom,irq_type = <IRQ_TYPE_LEVEL_LOW>;
+		wacom,pdct_type = <IRQ_TYPE_EDGE_BOTH>;
+		/* features */
+		wacom,boot_addr = <0x09>;
+		wacom,origin = <0 0>; /* x y */
+		wacom,max_coords = <15456 6955>; /* x y */
+		wacom,max_pressure = <4095>;
+		wacom,max_x_tilt = <63 63>;
+		wacom,max_height = <255>;
+		wacom,invert = <1 0 1>; /* x y switch */
+		wacom,fw_path = "epen/w9018_r7.fw";
+		wacom,fw_fac_path = "epen/w9018_r7_garage.fw", "";	/* "epen/w9018_r7_unit.fw"; */
+		wacom,support_aop_mode = "1"; /* S-note want to check to use aop */
+		wacom,use_garage;
+	};
+};

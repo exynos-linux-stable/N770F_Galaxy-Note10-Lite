@@ -55,7 +55,14 @@ obj-$(CONFIG_CXL_BASE)		+= cxl/
 obj-$(CONFIG_PANEL)             += panel.o
 
 obj-$(CONFIG_UID_SYS_STATS)	+= uid_sys_stats.o
+obj-$(CONFIG_MCU_IPC)           += mcu_ipc/
+obj-$(CONFIG_SEC_SIPC_MODEM_IF) += modem_v1/
+obj-$(CONFIG_SEC_MODEM_IF) 	+= modem_if/
 obj-$(CONFIG_MEMORY_STATE_TIME)	+= memory_state_time.o
+
+obj-y		+= tzic64.o
+
+obj-$(CONFIG_UH)		+= uh_debug_log.o
 
 lkdtm-$(CONFIG_LKDTM)		+= lkdtm_core.o
 lkdtm-$(CONFIG_LKDTM)		+= lkdtm_bugs.o

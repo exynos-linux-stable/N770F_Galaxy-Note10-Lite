@@ -1,0 +1,43 @@
+/*
+ * SAMSUNG EXYNOS9810 board device tree source
+ *
+ * Copyright (c) 2017 Samsung Electronics Co., Ltd.
+ *		http://www.samsung.com
+ *
+ * This program is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License version 2 as
+ * published by the Free Software Foundation.
+*/
+
+/dts-v1/;
+/plugin/;
+
+#include "exynos9810-r7_common.dtsi"
+#include "exynos9810-r7_s2mu106.dtsi"
+#include "exynos9810-r7_nfc_00.dtsi"
+#include "exynos9810-sensorhub.dtsi"
+#include "exynos9810-r7_fingerprint_00.dtsi"
+#include "exynos9810-r7_eur_open_gpio_00.dtsi"
+
+/ {
+	compatible = "samsung,R7 EUR OPEN 02", "samsung,EXYNOS9810";
+	dtbo-hw_rev = <2>;
+	dtbo-hw_rev_end = <2>;
+
+	fragment@model {
+		target-path = "/";
+		__overlay__ {
+			#address-cells = <2>;
+			#size-cells = <1>;
+
+			model = "Samsung R7 EUR OPEN 02 based on EXYNOS9810";
+		}; /* end of __overlay__ */
+	}; /* end of fragment */
+}; /* end of root */
+
+&spi_20 {
+	BCM4773@0 {
+		ssp-mag-array = /bits/ 8 <101 79 24 170 217 212 255 227 219 55 66 69 77 63 6 87 248 173 69 192 191 248 96 243 9 175 162>;
+	};
+};
+

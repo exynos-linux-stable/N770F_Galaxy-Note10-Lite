@@ -1,0 +1,169 @@
+/* Copyright (c) 2013, Samsung Electronics Corporation. All rights reserved.
+ *
+ * This program is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License version 2 and
+ * only version 2 as published by the Free Software Foundation.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ */
+
+&pinctrl_0 {
+	nfc_clk_req: nfc_clk_req {
+		samsung,pins = "gpa2-6";
+		samsung,pin-pud = <0>;
+	};
+	ese_check: ese_check {
+		samsung,pins = "gpa3-1";
+		samsung,pin-function = <0>;
+		samsung,pin-pud = <0>;
+		samsung,pin-pud-pdn = <0>;
+	};
+};
+
+&pinctrl_6 {
+	nfc_firm: nfc_firm {
+		samsung,pins = "gpg1-6";
+		samsung,pin-function = <0>;
+		samsung,pin-pud = <0>;
+		samsung,pin-val = <0>;
+		samsung,pin-con-pdn = <3>;
+		samsung,pin-pud-pdn = <0>;
+	};
+
+	nfc_en: nfc_en {
+		samsung,pins = "gpg1-0";
+		samsung,pin-function = <1>;
+		samsung,pin-pud = <0>;
+		samsung,pin-drv = <0>;
+		samsung,pin-con-pdn = <3>;
+		samsung,pin-pud-pdn = <0>;
+	};
+
+	ese_pwr: ese_pwr {
+		samsung,pins = "gpg0-4";
+		samsung,pin-function = <1>;
+		samsung,pin-pud = <0>;
+		samsung,pin-drv = <0>;
+		samsung,pin-con-pdn = <3>;
+		samsung,pin-pud-pdn = <0>;
+	};
+};
+
+&pinctrl_7 {
+	/* PERIC1 USI08 */
+	hsi2c20_nfc: hsi2c20-nfc {
+		samsung,pins = "gpp5-0", "gpp5-1";
+		samsung,pin-function = <2>;
+		samsung,pin-pud = <0>;
+		samsung,pin-drv = <0>;
+		samsung,pin-con-pdn = <2>;
+		samsung,pin-pud-pdn = <0>;
+	};
+};
+
+/* USI08_USI */
+&hsi2c_20 {
+	#address-cells = <1>;
+	#size-cells = <0>;
+	status = "okay";
+	clock-frequency = <400000>;
+	samsung,reset-before-trans;
+	pinctrl-names = "default";
+	pinctrl-0 = <&hsi2c20_nfc>;
+
+	pn547@2B {
+		compatible = "pn547";
+		reg = <0x2B>;
+
+		interrupts = <0 0 0>;
+		interrupt-parent = <&gpa1>;
+
+		pn547,ven-gpio = <&gpg1 0 0>;
+		pn547,firm-gpio = <&gpg1 6 1>;
+		pn547,irq-gpio = <&gpa1 2 0>;
+		pn547,clk_req-gpio = <&gpa2 6 0>;
+		pn547,pwr_req = <&gpg0 4 0>;
+
+		pn547,ldo_control;
+		pn547,nfc_pvdd = "vdd_ldo40";
+
+		clocks = <&clock OSC_NFC>;
+		clock-names = "oscclk_nfc";
+		pn547,nfc_ap_clk;
+
+		pinctrl-names = "default";
+		pinctrl-0 = <&nfc_en &nfc_firm &nfc_clk_req &ese_pwr>;
+	};
+};
+
+&pinctrl_7 {
+	/* PERIC1 USI06_SPI */
+	spi7_bus: spi7-bus {
+		samsung,pins = "gpp4-2", "gpp4-1", "gpp4-0";
+		samsung,pin-function = <2>;
+		samsung,pin-pud = <0>;
+		samsung,pin-drv = <0>;
+	};
+
+	spi7_cs: spi7-cs {
+		samsung,pins = "gpp4-3";
+		samsung,pin-function = <2>;
+		samsung,pin-pud = <0>;
+		samsung,pin-drv = <0>;
+	};
+	
+	spi7_bus_suspend: spi7-bus-suspend {
+		samsung,pins = "gpp4-2", "gpp4-1", "gpp4-0";
+		samsung,pin-function = <1>;	/* OUT */
+		samsung,pin-pud = <1>;		/* DOWN */
+		samsung,pin-drv = <0>;
+		samsung,pin-val = <0>;
+	};
+
+	spi7_cs_suspend: spi7-cs-suspend {
+		samsung,pins = "gpp4-3";
+		samsung,pin-function = <1>;	/* OUT */
+		samsung,pin-pud = <1>;		/* DOWN */
+		samsung,pin-drv = <0>;
+		samsung,pin-val = <0>;
+	};
+};
+
+/* USI_06 */
+&usi_6 {
+	usi_mode_v2 = "spi";
+	status = "ok";
+};
+
+/* SPI USI_PERIC1_USI06_SPI */
+&spi_7 {
+	status = "okay";
+	/delete-property/ pinctrl-names;
+	/delete-property/ pinctrl-0;
+
+	pinctrl-names = "ese_on", "ese_off";
+	pinctrl-0 = <&spi7_bus &spi7_cs>;
+	pinctrl-1 = <&spi7_bus_suspend &spi7_cs_suspend>;
+
+	ese_spi@0 {
+		compatible = "p61";
+		reg = <0>;
+		spi-max-frequency = <16000000>;
+		p61-ap_vendor = "slsi";
+		p61-spi_node = <&spi_7>;
+		p61-check_ese = <&gpa3 1 0>;
+		gpio-controller;
+		#gpio-cells = <2>;
+
+		pinctrl-names = "default";
+		pinctrl-0 = <&ese_check>;
+
+		controller-data {
+			samsung,spi-feedback-delay = <0>;
+			samsung,spi-chip-select-mode = <0>;
+		};
+	};
+};

@@ -1,0 +1,97 @@
+/*
+ * SAMSUNG EXYNOS9810 board device tree source
+ *
+ * Copyright (c) 2017 Samsung Electronics Co., Ltd.
+ *		http://www.samsung.com
+ *
+ * This program is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License version 2 as
+ * published by the Free Software Foundation.
+*/
+
+/dts-v1/;
+/plugin/;
+
+#include "exynos9810-r7_common.dtsi"
+#include "exynos9810-r7_s2mu107.dtsi"
+#include "exynos9810-r7_nfc_00.dtsi"
+#include "exynos9810-sensorhub.dtsi"
+#include "exynos9810-r7_fingerprint_00.dtsi"
+#include "exynos9810-r7_eur_open_gpio_00.dtsi"
+
+/ {
+	compatible = "samsung,R7 EUR OPEN 01", "samsung,EXYNOS9810";
+	dtbo-hw_rev = <1>;
+	dtbo-hw_rev_end = <1>;
+
+	fragment@model {
+		target-path = "/";
+		__overlay__ {
+			#address-cells = <2>;
+			#size-cells = <1>;
+
+			model = "Samsung R7 EUR OPEN 01 based on EXYNOS9810";
+		}; /* end of __overlay__ */
+	}; /* end of fragment */
+}; /* end of root */
+
+/ {
+	fragment@camera {
+		target-path = "/";
+		__overlay__ {
+			/* REAR CAMERA */
+			fimc_is_sensor_imx333: fimc-is_sensor_imx333@34 {
+				flash {
+					product_name = <17>; /* S2MU107 */
+				};
+			};
+
+			/* REAR CAMERA */
+			fimc_is_sensor_2l2: fimc-is_sensor_2l2@5A {
+				flash {
+					product_name = <17>; /* S2MU107 */
+				};
+			};
+
+			fimc_is_sensor_3m3: fimc-is_sensor_3m3@5A {
+				flash {
+					product_name = <17>; /* S2MU107 */
+				};
+			};
+			
+			/* Ultra Wide CAMERA */
+			fimc_is_sensor_3l6: fimc-is_sensor_3l6@10 {
+				flash {
+					product_name = <17>; /* S2MU107 */
+				};
+			};
+			
+			fimc_is_flash_gpio: fimc-is-flash-gpio@0 {
+				compatible = "samsung,sensor-flash-s2mu107";				
+			};
+		}; /* end of __overlay__ */
+	}; /* end of fragment */
+}; /* end of root */
+
+/* FLASH-LED : leds-s2mu107 */
+&hsi2c_40 {
+	s2mu107@3A {
+		flash_led {
+			torch-gpio = <&gpg2 4 0>;
+			flash-gpio = <&gpg3 5 0>;
+			flash_current = <1400>;
+			torch_current = <125>;
+			movie_current = <200>;
+			factory_current = <350>;
+			flashlight_current = <20 40 70 100 150>;
+			status = "okay";
+		};
+	};
+};
+
+&spi_20 {
+	BCM4773@0 {
+		ssp-mag-array = /bits/ 8 <101 79 24 170 217 212 255 227 219 55 66 69 77 63 6 87 248 173 69 192 191 248 96 243 9 175 162>;
+	};
+};
+

@@ -1,0 +1,143 @@
+
+&pinctrl_2 {
+	sensorhub_mosi_sck_ssn: sensorhub_mosi_sck_ssn {
+		samsung,pins = "gph0-0", "gph0-1", "gph0-3";
+		samsung,pin-function = <2>;
+		samsung,pin-pud = <0>;
+		samsung,pin-drv = <3>;
+	};
+	sensorhub_miso: sensorhub_miso {
+		samsung,pins = "gph0-2";
+		samsung,pin-function = <2>;
+		samsung,pin-pud = <1>;
+		samsung,pin-drv = <3>;
+	};
+	ssp_mcu_resp: ssp-mcu-resp {
+		samsung,pins = "gph0-4";
+		samsung,pin-function = <0>;
+		samsung,pin-pud = <0>;
+		samsung,pin-drv = <3>;
+		samsung,pin-con-pdn = <0>;
+		samsung,pin-pud-pdn = <0>;
+	};
+	ssp_mcu_req: ssp-mcu-req {
+		samsung,pins = "gph0-5";
+		samsung,pin-function = <1>;
+		samsung,pin-pud = <0>;
+		samsung,pin-drv = <3>;
+		samsung,pin-con-pdn = <1>;
+		samsung,pin-pud-pdn = <0>;
+	};
+};
+
+&pinctrl_0 {
+	ssp_batch_wake_irq: ssp-batch-wake-irq {
+		samsung,pins = "gpa0-5";
+		samsung,pin-function = <1>;
+		samsung,pin-pud = <0>;
+		samsung,pin-con-pdn = <1>;
+		samsung,pin-pud-pdn = <0>;
+	};
+	ssp_host_req: ssp-host-req {
+		samsung,pins = "gpa1-7";
+		samsung,pin-function = <0xf>;
+		samsung,pin-pud = <1>;
+		samsung,pin-drv = <3>;
+	};
+	ssp_shub_int: ssp-shub-int {
+		samsung,pins = "gpa4-0";
+		samsung,pin-function = <0xf>;
+		samsung,pin-pud = <1>;
+		samsung,pin-drv = <3>;
+	};
+};
+
+&pinctrl_6 {
+	ssp_gps_pwr_en: ssp-gps-pwr-en {
+		samsung,pins = "gpg0-2";
+		samsung,pin-function = <1>;
+		samsung,pin-pud = <1>;
+		samsung,pin-drv = <3>;
+		samsung,pin-con-pdn = <3>;
+		samsung,pin-pud-pdn = <0>;
+	};
+};
+
+&spi_20 {
+	#address-cells = <1>;
+	#size-cells = <0>;
+
+	pinctrl-names = "default";
+	pinctrl-0 = <&sensorhub_mosi_sck_ssn &sensorhub_miso>;
+
+	num-cs = <1>;
+	status = "okay";
+/*
+ *	dma-mode;
+ *	dmas = <&pdma0 21 0
+ *		&pdma0 20 0>;
+ */
+	BCM4773@0 {
+		compatible = "ssp,BCM4773";
+		reg = <0>;
+		/* spi-max-frequency = <26000000>; */
+		spi-max-frequency = <25000000>;
+		spi-cpol;
+		spi-cpha;
+		pinctrl-names = "default";
+		pinctrl-0 = <&ssp_host_req &ssp_mcu_req &ssp_mcu_resp &ssp_batch_wake_irq &ssp_shub_int &ssp_gps_pwr_en>;
+
+		gpio-controller;
+		#gpio-cells = <2>;
+		ssp-gps-pwr-en = <&gpg0 2 0x0>;
+		ssp-host-req = <&gpa1 7 0x00>;
+		ssp-mcu-req = <&gph0 5 0x00>;
+		ssp-mcu-resp = <&gph0 4 0x00>;
+		ssp-batch-wake-irq = <&gpa0 5 0x00>;
+		ssp-shub-int = <&gpa4 0 0x00>;
+		ssp-acc-position = <7>;
+		ssp-mag-position = <7>;
+		ssp-sns-combination = <0>;
+		ssp-ap-rev = <1>;
+		ssp-mag-array = /bits/ 8 <42 78 8 158 4 5 253 165 213 52 75 81 128 132 2 106 253 165 254 109
+					193 248 128 167 10 181 28>;
+		ssp-thermi-up = /bits/ 16 <3033 3003 2968 2922 2865 2794 2704 2614 2503 2382 2243 2090 1935
+					1770 1612 1454 1301 1157 1020 899 800 691 611>;
+		ssp-thermi-sub = /bits/ 16 <3033 3003 2968 2922 2865 2794 2704 2614 2503 2382 2243 2090 1935
+					1770 1612 1454 1301 1157 1020 899 800 691 611>;
+		ssp-glass-type = <0>;
+		ssp-mag-type = <1>;
+		ssp-vdd-mcu-1p8 = "vdd_mcu_1p8";
+
+		controller-data {
+			cs-gpio = <&gph0 3 0>;
+			samsung,spi-feedback-delay = <0>;
+		};
+	};
+};
+
+&ldo37_reg {
+		regulator-name = "vdd_mcu_1p8";
+		regulator-min-microvolt = <1800000>;
+		regulator-max-microvolt = <1800000>;
+		regulator-ramp-delay = <12000>;
+		regulator-initial-mode = <3>;
+};
+
+&ldo41_reg {
+		regulator-name = "vdd_shub_aon_1p8";
+		regulator-min-microvolt = <1800000>;
+		regulator-max-microvolt = <1800000>;
+		regulator-always-on;
+		regulator-initial-mode = <3>;
+};
+
+&ldo42_reg {
+		regulator-name = "vdd_proxy_lde_3p3";
+		regulator-min-microvolt = <3300000>;
+		regulator-max-microvolt = <3300000>;
+		regulator-always-on;
+		regulator-initial-mode = <3>;
+
+};
+
